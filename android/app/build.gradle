@@ -9,7 +9,7 @@ android {
     namespace = "com.example.paddy_scan"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "25.1.8937393"
-
+    flavorDimensions "default"
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -42,6 +42,38 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.debug
+        }
+    }
+    productFlavors {
+        ML1PaddyScan1 {
+            dimension "default"
+            applicationIdSuffix ".ml1paddyscan1"
+            resValue "string", "app_name", "ML1PaddyScan1"
+        }
+        ML1PaddyScan2 {
+            dimension "default"
+            applicationIdSuffix ".ml1paddyscan2"
+            resValue "string", "app_name", "ML1PaddyScan2"
+        }
+        ML1PaddyScan3 {
+            dimension "default"
+            applicationIdSuffix ".ml1paddyscan3"
+            resValue "string", "app_name", "ML1PaddyScan3"
+        }
+        ML2PaddyScan1 {
+            dimension "default"
+            applicationIdSuffix ".ml2paddyscan1"
+            resValue "string", "app_name", "ML2PaddyScan1"
+        }
+        ML2PaddyScan2 {
+            dimension "default"
+            applicationIdSuffix ".ml2paddyscan2"
+            resValue "string", "app_name", "ML2PaddyScan2"
+        }
+        ML3PaddyScan3 {
+            dimension "default"
+            applicationIdSuffix ".ml3paddyscan3"
+            resValue "string", "app_name", "ML3PaddyScan3"
         }
     }
 }
