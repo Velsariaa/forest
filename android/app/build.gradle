@@ -70,10 +70,10 @@ android {
             applicationIdSuffix ".ml2paddyscan2"
             resValue "string", "app_name", "ML2PaddyScan2"
         }
-        ML3PaddyScan3 {
+        ML2PaddyScan3 {
             dimension "default"
-            applicationIdSuffix ".ml3paddyscan3"
-            resValue "string", "app_name", "ML3PaddyScan3"
+            applicationIdSuffix ".ml2paddyscan3"
+            resValue "string", "app_name", "ML2PaddyScan3"
         }
     }
 }
