@@ -1,0 +1,2 @@
+C:/xampp/htdocs/forest/android/app/.cxx/RelWithDebInfo/4b2q3a5w/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/xampp/htdocs/forest/android/app/.cxx/RelWithDebInfo/4b2q3a5w/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -18,6 +18,8 @@ android {
 
     dependencies {
         coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.2.2' // Latest version might be different
+        implementation 'org.tensorflow:tensorflow-lite:2.11.0'
+        implementation 'org.tensorflow:tensorflow-lite-gpu:2.11.0'
     }
 
     kotlinOptions {
