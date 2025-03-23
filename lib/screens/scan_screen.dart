@@ -1,13 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:paddy_scan/util/detection/rice_mobnet_detector.dart';
-import 'package:paddy_scan/util/detection/rice_status_mobnet_detector.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
-import '../appstate.dart';
 import 'package:image/image.dart' as img;
+import '../appstate.dart';
+import 'package:paddy_scan/util/detection/rice_mobnet_detector.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -19,15 +18,23 @@ class ScanScreen extends StatefulWidget {
 class _ScanScreenState extends State<ScanScreen> {
   File? _image;
   final picker = ImagePicker();
-  String? _imagePath; // Store the image path
+  String? _imagePath;
   RiceMobnetDetector detector = RiceMobnetDetector();
-  List<Map<String, dynamic>> _rice_detections = [];
-  RiceStatusMobnetDetector riceStatusDetector = RiceStatusMobnetDetector();
-  List<Map<String, dynamic>> _rice_status_detections = [];
+  List<Map<String, dynamic>> _riceDetections = [];
   bool _isLoading = false;
   bool _isRice = false;
-  String _current_rice_classification = '';
-  String _current_rice = '';
+  String _currentRiceClassification = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLastImagePath();
+    _loadModel();
+  }
+
+  Future<void> _loadModel() async {
+    await detector.loadModel();
+  }
 
   Future<void> getImage() async {
     showModalBottomSheet(
@@ -40,9 +47,8 @@ class _ScanScreenState extends State<ScanScreen> {
                 leading: const Icon(Icons.camera),
                 title: const Text("Take a Photo"),
                 onTap: () async {
-                  Navigator.pop(context); // Close dialog
-                  final pickedFile =
-                      await picker.pickImage(source: ImageSource.camera);
+                  Navigator.pop(context);
+                  final pickedFile = await picker.pickImage(source: ImageSource.camera);
                   _handleImageSelection(pickedFile);
                 },
               ),
@@ -50,9 +56,8 @@ class _ScanScreenState extends State<ScanScreen> {
                 leading: const Icon(Icons.photo_library),
                 title: const Text("Choose from Gallery"),
                 onTap: () async {
-                  Navigator.pop(context); // Close dialog
-                  final pickedFile =
-                      await picker.pickImage(source: ImageSource.gallery);
+                  Navigator.pop(context);
+                  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
                   _handleImageSelection(pickedFile);
                 },
               ),
@@ -68,8 +73,8 @@ class _ScanScreenState extends State<ScanScreen> {
       setState(() {
         _image = File(pickedFile.path);
         _imagePath = pickedFile.path;
-        _saveImagePath(_imagePath!);
       });
+      _saveImagePath(_imagePath!);
     } else {
       print('No image selected.');
     }
@@ -89,20 +94,8 @@ class _ScanScreenState extends State<ScanScreen> {
       final file = File(filePath);
       return await file.readAsString();
     } catch (e) {
-      return null; // Handle file not found or other errors
+      return null;
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadLastImagePath();
-    _loadModel();
-  }
-
-  Future<void> _loadModel() async {
-    await detector.loadModel();
-    await riceStatusDetector.loadModel();
   }
 
   Future<void> _loadLastImagePath() async {
@@ -116,86 +109,52 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   Future<void> _processRiceImage() async {
-    if (_image == null) return;
-    final bytes = await _image!.readAsBytes();
-    img.Image? image = img.decodeImage(bytes);
-    if (image == null) {
-      print("Could not decode image");
-      _setLoading();
-      return;
-    }
+    try {
+      print("Processing image...");
+      if (_image == null) throw Exception("No image selected");
 
-    final detections = detector.detectObjects(image);
-    setState(() {
-      _rice_detections = detections;
-    });
+      final bytes = await _image!.readAsBytes();
+      img.Image? image = img.decodeImage(bytes);
 
-    if (_rice_detections.isNotEmpty) {
-      _rice_detections.forEach((result) {
-        String rice = result['label'];
-        setState(() {
-          _isRice = rice.trim() == 'Rice Plant';
-          _current_rice = rice;
-          _isRice ? _processRiceStatusImage() : _setLoading();
-        });
+      if (image == null) throw Exception("Could not decode image");
 
-        print('Rice Detection is not Empty: ${_rice_detections.first}');
-        print('Rice Detection: ${result['label']}');
-        print(
-            'Rice Detection Confidence: ${(result['confidence'] * 100).toStringAsFixed(2)}%');
+      print("Detecting objects...");
+      final detections = detector.detectObjects(image);
+
+      print("Detections: $detections");
+      setState(() {
+        _riceDetections = detections;
       });
-    } else {
-      print('Rice Detection is Empty: ${_rice_detections.isEmpty}');
-    }
-  }
 
-  Future<void> _processRiceStatusImage() async {
-    print('Rice Classification Detection');
-    if (_image == null) return;
-    final bytes = await _image!.readAsBytes();
-    img.Image? image = img.decodeImage(bytes);
-    if (image == null) {
-      print("Could not decode image");
-      _setLoading();
-      return;
-    }
-
-    final riceStatusDetections = riceStatusDetector.detectObjects(image);
-    setState(() {
-      _rice_status_detections = riceStatusDetections;
-    });
-
-    _rice_status_detections.isNotEmpty
-        ? _rice_status_detections.map((result) {
-            setState(() {
-              _current_rice_classification = result['label'];
-            });
-            print('Rice Status Detection: ${result['label']}');
-            print(
-                'Rice Status Detection Confidence: ${(result['confidence'] * 100).toStringAsFixed(2)}%');
-          }).toList()
-        : print(
-            'Rice Status Detection is Empty: ${_rice_status_detections.isEmpty}');
-  }
-
-  void _resetImage() {
-    setState(() {
-      _image = null;
-      _imagePath = null;
-      _saveImagePath(''); // Clear the saved path
-    });
-  }
-
-  void _setLoading() {
-    setState(() {
-      _isLoading = !_isLoading;
-      print('Set Loading to: $_isLoading');
-      if (_isLoading) {
-        _showLoadingDialog();
-      } else {
-        _dismissLoadingDialog();
+      if (_riceDetections.isEmpty) {
+        throw Exception("No rice detected");
       }
+
+      _isRice = _riceDetections.any((result) => result['label'] == 'Rice Plant');
+
+      print("Rice detected? $_isRice");
+
+    } catch (e) {
+      print("Error during rice processing: $e");
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  void _setLoading(bool isLoading) {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = isLoading;
     });
+
+    if (isLoading) {
+      _showLoadingDialog();
+    } else {
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+    }
   }
 
   void _showLoadingDialog() {
@@ -221,8 +180,13 @@ class _ScanScreenState extends State<ScanScreen> {
     });
   }
 
-  void _dismissLoadingDialog() {
-    Navigator.of(context).pop();
+  /// Reset image selection
+  void _resetImage() {
+    setState(() {
+      _image = null;
+      _imagePath = null;
+    });
+    _saveImagePath('');
   }
 
   @override
@@ -242,54 +206,41 @@ class _ScanScreenState extends State<ScanScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               GestureDetector(
-                onTap: _image != null
-                    ? _resetImage
-                    : getImage, // Open Camera/Gallery
+                onTap: _image != null ? _resetImage : getImage,
                 child: _image == null
                     ? Image.asset('assets/images/TapToOpenCam.png', height: 500)
                     : Image.file(_image!, height: 500, fit: BoxFit.fitHeight),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _image != null
+                onPressed: _image != null && !_isLoading
                     ? () async {
-                        if (_isLoading) return;
-                        _setLoading();
-                        appState.currentImagePath = _imagePath!;
+                        _setLoading(true);
+                        await _processRiceImage();
+                        _setLoading(false);
 
-                        Future.delayed(Duration(milliseconds: 1000), () async {
-                          await _processRiceImage();
+                        appState.currentImagePath = _imagePath ?? '';
 
-                          if (_isRice) {
-                            await _processRiceStatusImage();
-                          }
+                        if (_isRice) {
+                          appState.currentImageClassification = _currentRiceClassification;
+                        } else {
+                          appState.currentImageClassification = 'Not Rice';
+                        }
 
-                          if (_current_rice_classification.isNotEmpty) {
-                            appState.currentImageClassification =
-                                _current_rice_classification;
-                            _setLoading();
-                            Navigator.pushNamed(context, '/scan_result');
-                          } else {
-                            print("No classification detected.");
-                            appState.currentImageClassification = _current_rice;
-                            Navigator.pushNamed(context, '/scan_result');
-                          }
-                        });
+                        Navigator.pushNamed(context, '/scan_result');
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   textStyle: const TextStyle(fontSize: 20),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child:
-                    const Text('Scan', style: TextStyle(color: Colors.white)),
+                child: const Text('Scan', style: TextStyle(color: Colors.white)),
               ),
-              if (_imagePath != null) // Display the file path
+              if (_imagePath != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
                   child: Text(
