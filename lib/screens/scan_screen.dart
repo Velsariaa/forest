@@ -199,61 +199,65 @@ class _ScanScreenState extends State<ScanScreen> {
         title: const Text('Scan', style: TextStyle(color: Colors.green)),
         elevation: 0.0,
       ),
-      body: Container(
-        color: Colors.grey[300],
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              GestureDetector(
-                onTap: _image != null ? _resetImage : getImage,
-                child: _image == null
-                    ? Image.asset('assets/images/TapToOpenCam.png', height: 500)
-                    : Image.file(_image!, height: 500, fit: BoxFit.fitHeight),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _image != null && !_isLoading
-                    ? () async {
-                        _setLoading(true);
-                        await _processRiceImage();
-                        _setLoading(false);
-
-                        appState.currentImagePath = _imagePath ?? '';
-
-                        if (_isRice) {
-                          appState.currentImageClassification = _currentRiceClassification;
-                          appState.currentImageClassification = "Rice Plant";
-                        } else {
-                          appState.currentImageClassification = 'Non Rice';
-                        }
-
-                        Navigator.pushNamed(context, '/scan_result');
-                      }
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  textStyle: const TextStyle(fontSize: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+      body: GestureDetector(
+        onTap: _image != null ? _resetImage : getImage, // Tap anywhere to trigger
+        child: Container(
+          color: Colors.grey[300],
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                GestureDetector(
+                  onTap: _image != null ? _resetImage : getImage,
+                  child: _image == null
+                      ? Image.asset('assets/images/TapToOpenCam.png', height: 500)
+                      : Image.file(_image!, height: 500, fit: BoxFit.fitHeight),
                 ),
-                child: const Text('Scan', style: TextStyle(color: Colors.white)),
-              ),
-              if (_imagePath != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: Text(
-                    'Image Path: $_imagePath',
-                    style: const TextStyle(fontSize: 12),
-                    textAlign: TextAlign.center,
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _image != null && !_isLoading
+                      ? () async {
+                    _setLoading(true);
+                    await _processRiceImage();
+                    _setLoading(false);
+
+                    appState.currentImagePath = _imagePath ?? '';
+
+                    if (_isRice) {
+                      appState.currentImageClassification = _currentRiceClassification;
+                      appState.currentImageClassification = "Rice Plant";
+                    } else {
+                      appState.currentImageClassification = 'Non Rice';
+                    }
+
+                    Navigator.pushNamed(context, '/scan_result');
+                  }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    textStyle: const TextStyle(fontSize: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
+                  child: const Text('Scan', style: TextStyle(color: Colors.white)),
                 ),
-            ],
+                if (_imagePath != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Text(
+                      'Image Path: $_imagePath',
+                      style: const TextStyle(fontSize: 12),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
     );
+
   }
 }
