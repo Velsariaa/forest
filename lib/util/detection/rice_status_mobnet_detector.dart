@@ -14,12 +14,12 @@ class RiceStatusMobnetDetector {
        //  'assets/models/rice_status_model/rice_status_vgg.tflite');
      // _interpreter = await Interpreter.fromAsset(
      //    'assets/models/rice_status_model/rice_status_cnn_model.tflite');
-      //_interpreter = await Interpreter.fromAsset(
-        // 'assets/models/rice_status_model/rice_status_dense_net_model.tflite');
+      _interpreter = await Interpreter.fromAsset(
+         'assets/models/rice_status_model/rice_status_dense_net_model.tflite');
      // _interpreter = await Interpreter.fromAsset(
      //   'assets/models/rice_status_model/rice_status_inception.tflite');
-      _interpreter = await Interpreter.fromAsset(
-         'assets/models/rice_status_model/rice_status_NASNetMobile_model.tflite');
+    // _interpreter = await Interpreter.fromAsset(
+      //   'assets/models/rice_status_model/rice_status_NASNetMobile_model.tflite');
 
     final labelsData = await rootBundle
         .loadString('assets/models/rice_status_model/status_rice.txt');
