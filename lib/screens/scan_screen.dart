@@ -225,7 +225,7 @@ class _ScanScreenState extends State<ScanScreen> {
                           appState.currentImageClassification = _currentRiceClassification;
                           appState.currentImageClassification = "Rice Plant";
                         } else {
-                          appState.currentImageClassification = 'Not Rice';
+                          appState.currentImageClassification = 'Non Rice';
                         }
 
                         Navigator.pushNamed(context, '/scan_result');
