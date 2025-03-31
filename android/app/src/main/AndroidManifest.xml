@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
     
     <application
-        android:label="Paddy Inception"
+        android:label="Paddy Exception ML1"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
