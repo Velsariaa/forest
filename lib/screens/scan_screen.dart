@@ -187,7 +187,6 @@ class _ScanScreenState extends State<ScanScreen> {
   void _dismissLoadingDialog() {
     Navigator.of(context).pop();
   }
-
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
@@ -198,68 +197,71 @@ class _ScanScreenState extends State<ScanScreen> {
         title: const Text('Scan', style: TextStyle(color: Colors.green)),
         elevation: 0.0,
       ),
-      body: Container(
-        color: Colors.grey[300],
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              GestureDetector(
-                onTap: _image != null ? _resetImage : getImage,
-                child: _image == null
-                    ? Image.asset('assets/images/TapToOpenCam.png',
-                    height: 500)
-                    : Image.file(_image!, height: 500, fit: BoxFit.fitHeight),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _image != null
-                    ? () async {
-                  if (_isLoading) return;
-                  _setLoading();
-                  appState.currentImagePath = _imagePath!;
-
-                  Future.delayed(Duration(milliseconds: 1000), () async {
-                    await _processRiceStatusImage();
-
-                    if (_current_rice_classification.isNotEmpty) {
-                      appState.currentImageClassification =
-                          _current_rice_classification;
-                    } else {
-                      print("No classification detected.");
-                      appState.currentImageClassification = "Unknown";
-                    }
-
+      body: GestureDetector(
+        onTap: getImage, // Ensures tap anywhere on screen triggers getImage
+        child: Container(
+          color: Colors.grey[300],
+          width: double.infinity,
+          height: double.infinity, // Makes sure the entire screen is tappable
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                GestureDetector(
+                  onTap: _image != null ? _resetImage : getImage, // Ensures tap on image also works
+                  child: _image == null
+                      ? Image.asset('assets/images/TapToOpenCam.png', height: 500)
+                      : Image.file(_image!, height: 500, fit: BoxFit.fitHeight),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _image != null
+                      ? () async {
+                    if (_isLoading) return;
                     _setLoading();
-                    Navigator.pushNamed(context, '/scan_result');
-                  });
-                }
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  textStyle: const TextStyle(fontSize: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    appState.currentImagePath = _imagePath!;
+
+                    Future.delayed(const Duration(milliseconds: 1000), () async {
+                      await _processRiceStatusImage();
+
+                      if (_current_rice_classification.isNotEmpty) {
+                        appState.currentImageClassification = _current_rice_classification;
+                      } else {
+                        print("No classification detected.");
+                        appState.currentImageClassification = "Unknown";
+                      }
+
+                      _setLoading();
+                      Navigator.pushNamed(context, '/scan_result');
+                    });
+                  }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    textStyle: const TextStyle(fontSize: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
+                  child: const Text('Scan', style: TextStyle(color: Colors.white)),
                 ),
-                child:
-                const Text('Scan', style: TextStyle(color: Colors.white)),
-              ),
-              if (_imagePath != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: Text(
-                    'Image Path: $_imagePath',
-                    style: const TextStyle(fontSize: 12),
-                    textAlign: TextAlign.center,
+                if (_imagePath != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Text(
+                      'Image Path: $_imagePath',
+                      style: const TextStyle(fontSize: 12),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
+
+
   }
 }
